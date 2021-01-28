@@ -2,6 +2,11 @@
 APP_CONTAINER  = app
 RUN_CONTAINER   = docker-compose run --rm $(APP_CONTAINER)
 
+UID := $(shell id -u)
+GID := $(shell id -g)
+export UID
+export GID
+
 # This will output the help for each task
 # thanks to https://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
 .PHONY: help
@@ -21,6 +26,12 @@ build-nc: ## Build containers without caching
 
 sh: ## Run sh on app container
 	$(RUN_CONTAINER) sh
+
+up: ## Up containers
+	docker-compose up -d
+
+down: ## Down containers
+	docker-compose down
 
 ## ----- Composer -----
 
