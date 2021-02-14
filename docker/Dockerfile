@@ -1,21 +1,26 @@
-FROM php:8.0-fpm
-MAINTAINER Adrien Chinour <git@chinour.fr>
+FROM php:7.4-fpm-alpine
+
+LABEL Maintainer="Adrien Chinour <git@chinour.fr>"
+LABEL Vendor="Adrien Chinour"
+LABEL License="MIT"
+LABEL Version=7.4-fpm
 
 ARG DEBIAN_FRONTEND=noninteractive
+ARG UID
+ARG GID
 
-# Add composer
-FROM composer:2.0 AS composer
-COPY --from=composer /usr/bin/composer /usr/bin/composer
+RUN addgroup -S -g $UID app \
+    && adduser -S -u $GID -G app app
 
-# Install dependencies
-RUN apt-get update \
-  && apt-get install -y \
-  libzip-dev \
-  zip
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Install PHP extensions
-RUN docker-php-ext-configure zip \
-  && docker-php-ext-install zip
+# https://getcomposer.org/doc/03-cli.md#composer-allow-superuser
+ENV COMPOSER_ALLOW_SUPERUSER=1
+RUN set -eux; \
+	composer clear-cache
+ENV PATH="${PATH}:/root/.composer/vendor/bin"
 
-WORKDIR /app
+USER app
+
 EXPOSE 9000
+WORKDIR "/srv"

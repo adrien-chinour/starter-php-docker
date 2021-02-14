@@ -4,6 +4,9 @@ services:
     app:
         build:
             context: ./docker
+            args:
+                UID: ${UID}
+                GID: ${GID}
         volumes:
             - .:/app
         user: "${UID}:${GID}"
